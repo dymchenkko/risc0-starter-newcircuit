@@ -1,7 +1,7 @@
 // TODO: Update the name of the method loaded by the prover. E.g., if the method is `multiply`, replace `METHOD_NAME_ID` with `MULTIPLY_ID` and replace `METHOD_NAME_PATH` with `MULTIPLY_PATH`
 use methods::{METHOD_NAME_ID, METHOD_NAME_PATH};
-use risc0_zkvm::host::Prover;
-// use risc0_zkvm::serde::{from_slice, to_vec};
+use risc0_zkvm::prove::Prover;
+use risc0_zkvm::serde::{from_slice, to_vec};
 
 fn main() {
     // Make the prover.
@@ -11,11 +11,15 @@ fn main() {
         .expect("Prover should be constructed from valid method source code and corresponding method ID");
 
     // TODO: Implement communication with the guest here
+    let n:u32 = 65;
+    prover.add_input_u32_slice(to_vec(&n).unwrap().as_slice());
 
     // Run prover & generate receipt
     let receipt = prover.run()
         .expect("Valid code should be provable if it doesn't overflow the cycle limit. See `embed_methods_with_options` for information on adjusting maximum cycle count.");
 
+    let c: u32 = from_slice(&receipt.journal.to_vec()).unwrap();
+    println!("{}", c);
     // Optional: Verify receipt to confirm that recipients will also be able to verify your receipt
     receipt.verify(METHOD_NAME_ID)
         .expect("Code you have proven should successfully verify; did you specify the correct method ID?");
